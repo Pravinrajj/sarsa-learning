@@ -2,30 +2,58 @@
 
 
 ## AIM
-To develop SARSA RL to train an agent in Gym environment for optimal policy learning.
+To develop a Python program to find the optimal policy for the given RL environment using SARSA-Learning and compare the state values with the Monte Carlo method.
 
 ## PROBLEM STATEMENT
-Train agent with SARSA in Gym environment, making sequential decisions for maximizing cumulative rewards.
+The bandit slippery walk problem is a reinforcement learning problem in which an agent must learn to navigate a 7-state environment in order to reach a goal state. The environment is slippery, so the agent has a chance of moving in the opposite direction of the action it takes.
+
+### States:
+The environment has 7 states:
+
+* Two Terminal States: G: The goal state & H: A hole state.
+* Five Transition states / Non-terminal States including S: The starting state.
+### Actions:
+The agent can take two actions:
+
+* R: Move right.
+* L: Move left.
+### Transition Probabilities:
+The transition probabilities for each action are as follows:
+
+* 50% chance that the agent moves in the intended direction.
+* 33.33% chance that the agent stays in its current state.
+* 16.66% chance that the agent moves in the opposite direction. For example, if the agent is in state S and takes the "R" action, then there is a 50% chance that it will move to state 4, a 33.33% chance that it will stay in state S, and a 16.66% chance that it will move to state 2.
+### Rewards:
+The agent receives a reward of +1 for reaching the goal state (G). The agent receives a reward of 0 for all other states.
 ## SARSA LEARNING ALGORITHM
-### Step 1:
+1. Initialize the Q-values arbitrarily for all state-action pairs.
 
-Initialize the Q-table with random values for all state-action pairs.
-### Step 2:
+2. Repeat for each episode:
 
-Initialize the current state S and choose the initial action A using an epsilon-greedy policy based on the Q-values in the Q-table.
-### tep 3:
+i. Initialize the starting state.
 
-Repeat until the episode ends and then take action A and observe the next state S' and the reward R.
-### Step 4:
+ii. Repeat for each step of episode:
+~~~
+   a. Choose action from state using policy derived from Q (e.g., epsilon-greedy).
 
-Update the Q-value for the current state-action pair (S, A) using the SARSA update rule.
-### Step 5:
-Update State and Action and repeat the step 3 untill the episodes ends.
+   b. Take action, observe reward and next state.
+
+   c. Choose action from next state using policy derived from Q (e.g., epsilon-greedy).
+
+   d. Update Q(s, a) := Q(s, a) + alpha * [R + gamma * Q(s', a') - Q(s, a)]
+
+   e. Update the state and action.
+~~~
+   iii. Until state is terminal.
+
+3. Until performance converges.
+
 ## SARSA LEARNING FUNCTION
 ```
-Name: PRAVINRAJJ G.K
-Register Number: 212222240080
-
+NAME: PRAVINRAJJ G.K
+REGISTER NUMBER: 212222240080
+```
+~~~
 def sarsa(env,
           gamma=1.0,
           init_alpha=0.5,
@@ -39,41 +67,41 @@ def sarsa(env,
     pi_track = []
     Q = np.zeros((nS, nA), dtype=np.float64)
     Q_track = np.zeros((n_episodes, nS, nA), dtype=np.float64)
-    def select_action(state, Q, epsilon):
-        if np.random.random() > epsilon:
-            return np.argmax(Q[state])
-        else:
-            return np.random.randint(nA)
-    def decay_schedule(init_value, min_value, decay_ratio, n_episodes):
-        values = [max(init_value * (decay_ratio ** i), min_value) for i in range(n_episodes)]
-        return values
-    alphas = decay_schedule(init_alpha, min_alpha, alpha_decay_ratio, n_episodes)
-    epsilons = decay_schedule(init_epsilon, min_epsilon, epsilon_decay_ratio, n_episodes)
+    # Write your code here
+    select_action = lambda state, Q, epsilon:np.argmax(Q[state]) if np.random.random() > epsilon else np.random.randint(len(Q[state]))
+    alphas = decay_schedule(init_alpha, min_alpha,
+                            alpha_decay_ratio, n_episodes)
+    epsilons = decay_schedule(init_epsilon, min_epsilon,
+                              epsilon_decay_ratio, n_episodes)
     for e in tqdm(range(n_episodes), leave=False):
-        state, done = env.reset(), False
-        action = select_action(state, Q, epsilons[e])
-        while not done:
-            next_state, reward, done, _ = env.step(action)
-            next_action = select_action(next_state, Q, epsilons[e])
-            td_target = reward + gamma * Q[next_state][next_action] * (not done)
-            td_error = td_target - Q[state][action]
-            Q[state][action] = Q[state][action] + alphas[e] * td_error
-            state, action = next_state, next_action
-        Q_track[e] = Q
-        pi_track.append(np.argmax(Q, axis=1))
+      state, done = env.reset(), False
+      action = select_action(state, Q, epsilons[e])
+      while not done:
+        next_state, reward, done, _= env.step(action)
+        next_action = select_action(next_state, Q, epsilons[e])
+        td_target = reward + gamma * Q[next_state][next_action] * (not done)
+        td_error = td_target - Q[state][action]
+        Q[state][action] = Q[state][action] + alphas[e] * td_error
+        state, action = next_state, next_action
+      Q_track[e] = Q
+      pi_track.append(np.argmax(Q, axis=1))
     V = np.max(Q, axis=1)
-    pi = lambda s: np.argmax(Q[s])
+    pi = lambda s: {s:a for s, a in enumerate(np.argmax(Q, axis=1))}[s]
     return Q, V, pi, Q_track, pi_track
-```
+~~~
+
 ## OUTPUT:
-### Optimal policy, optimal value function , success rate for the optimal policy.
-![Screenshot from 2023-11-04 09-05-26](https://github.com/kiran03-jagadeesh/sarsa-learning/assets/94174536/bd7a7faf-b78b-4abe-9570-7d2ee178c9d4)
+### Optimal Policy:
+![280930168-b1f0e2fd-3016-4de5-b624-ee742c65d042](https://github.com/charansai0/sarsa-learning/assets/94296221/43318948-a2a1-48f6-877b-7475305234a9)
+### First Visit Monte Carlo Method:
+![280930318-839d4ba3-c368-4a6a-884a-7454e439b8ca](https://github.com/charansai0/sarsa-learning/assets/94296221/9c2a0059-495f-411f-b85b-eb5a10675b1d)
+### SARSA Learning Algorithm:
+![280930423-c2793936-d56c-41b7-94d7-11c9493ac24f](https://github.com/charansai0/sarsa-learning/assets/94296221/39d76c94-21c6-4f09-87d1-69d970873888)
+### Plot for State Value Function - Monte Carlo:
+![Screenshot 2024-05-07 185731](https://github.com/NavinkumarJ/sarsa-learning/assets/115530758/96604aa8-ecb4-4d14-bd4c-054dc511e6aa)
+### Plot for State Value Function - SARSA Learning:
+![Screenshot 2024-05-07 185848](https://github.com/NavinkumarJ/sarsa-learning/assets/115530758/76bb2402-4690-4b8c-952c-f69b06d2b4c7)
 
-### State value functions of Monte Carlo method
-![Screenshot from 2023-11-04 09-09-17](https://github.com/kiran03-jagadeesh/sarsa-learning/assets/94174536/bd7a9b71-c0c7-46e0-b2d3-9fccf1c0dbec)
-
-### State value functions of SARSA learning.
-![Screenshot from 2023-11-04 09-10-16](https://github.com/kiran03-jagadeesh/sarsa-learning/assets/94174536/2e83826c-2e15-47cf-846a-73598caa6b47)
 
 ## RESULT:
-SARSA learning successfully trained an agent for optimal policy.
+Thus, the implementation of SARSA learning algorithm was implemented successfully.
