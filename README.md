@@ -53,7 +53,7 @@ ii. Repeat for each step of episode:
 NAME: PRAVINRAJJ G.K
 REGISTER NUMBER: 212222240080
 ```
-~~~
+```python
 def sarsa(env,
           gamma=1.0,
           init_alpha=0.5,
@@ -88,7 +88,7 @@ def sarsa(env,
     V = np.max(Q, axis=1)
     pi = lambda s: {s:a for s, a in enumerate(np.argmax(Q, axis=1))}[s]
     return Q, V, pi, Q_track, pi_track
-~~~
+```
 
 ## OUTPUT:
 ### Optimal Policy:
